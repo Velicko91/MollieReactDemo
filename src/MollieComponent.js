@@ -18,7 +18,7 @@ export default class MollieComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = { message: "", cardToken: "", buttonDisabled: true };
-    this.mollie = window.Mollie(this.props.mollieProfileKey, {
+    this.mollie = window.Mollie("pfl_A2RUnbyn6b", {
       locale: this.props.mollieLocale,
       testmode: this.props.mollieTestMode
     });

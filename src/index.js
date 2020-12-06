@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import App from "./App";
-import MollieComponent from "./Mollie";
+import MollieComponent from "./MollieComponent";
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(
