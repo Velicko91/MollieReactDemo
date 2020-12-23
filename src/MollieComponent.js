@@ -4,40 +4,62 @@ import "./mollie.css";
 // import '/base.css'
 
 export default class MollieComponent extends React.Component {
-  mollie;
+
+  //Make mollie ref
+  mollie = React.createRef();
+
+  //Create field refs
   formErrorRef = React.createRef();
-  cardNumber;
+  cardNumber = React.createRef();
   cardNumberErrorRef = React.createRef();
-  cardHolder;
+  cardHolder = React.createRef();
   cardHolderErrorRef = React.createRef();
-  expiryDate;
+  expiryDate = React.createRef();
   expiryDateErrorRef = React.createRef();
-  verificationCode;
+  verificationCode = React.createRef();
   verificationCodeErrorRef = React.createRef();
+
+  //Make div refs
+  cardNumberDivRef = React.createRef();
+  cardHolderDivRef = React.createRef();
+  expiryDateDivRef = React.createRef();
+  verificationCodeDivRef = React.createRef();
+
   form = React.createRef();
+
+
   constructor(props) {
     super(props);
     this.state = { message: "", cardToken: "", buttonDisabled: true };
-    this.mollie = window.Mollie("pfl_A2RUnbyn6b", {
-      locale: this.props.mollieLocale,
-      testmode: this.props.mollieTestMode
-    });
-    this.cardNumber = this.mollie.createComponent("cardNumber");
-    this.cardHolder = this.mollie.createComponent("cardHolder");
-    this.expiryDate = this.mollie.createComponent("expiryDate");
-    this.verificationCode = this.mollie.createComponent("verificationCode");
     this.disableForm = this.disableForm.bind(this);
     this.enableForm = this.enableForm.bind(this);
     this.submit = this.submit.bind(this);
   }
 
   componentDidMount() {
-    this.cardNumber.mount("#card-number");
-    this.cardHolder.mount("#card-holder");
-    this.expiryDate.mount("#expiry-date");
-    this.verificationCode.mount("#verification-code");
+    //check if mollie components have been initialised
+    if (this.mollie.current) {
+      return;
+    }
 
-    this.cardHolder.addEventListener("change", (event) => {
+    this.mollie.current = window.Mollie("pfl_A2RUnbyn6b", {
+      locale: "nl_NL",
+      testmode: "test"
+    });
+
+    //create Mounting objects
+    this.cardNumber.current = this.mollie.current.createComponent("cardNumber");
+    this.cardHolder.current = this.mollie.current.createComponent("cardHolder");
+    this.expiryDate.current = this.mollie.current.createComponent("expiryDate");
+    this.verificationCode.current = this.mollie.current.createComponent("verificationCode");
+
+    //Mount objects
+    this.cardNumber.current.mount("#card-number");
+    this.cardHolder.current.mount("#card-holder");
+    this.expiryDate.current.mount("#expiry-date");
+    this.verificationCode.current.mount("#verification-code");
+
+    this.cardHolder.current.addEventListener("change", (event) => {
       if (this.cardHolderErrorRef.current) {
         if (event.error && event.touched) {
           this.cardHolderErrorRef.current.textContent = event.error;
@@ -47,7 +69,7 @@ export default class MollieComponent extends React.Component {
       }
     });
 
-    this.cardNumber.addEventListener("change", (event) => {
+    this.cardNumber.current.addEventListener("change", (event) => {
       if (this.cardNumberErrorRef.current) {
         if (event.error && event.touched) {
           this.cardNumberErrorRef.current.textContent = event.error;
@@ -57,7 +79,7 @@ export default class MollieComponent extends React.Component {
       }
     });
 
-    this.expiryDate.addEventListener("change", (event) => {
+    this.expiryDate.current.addEventListener("change", (event) => {
       if (this.expiryDateErrorRef.current) {
         if (event.error && event.touched) {
           this.expiryDateErrorRef.current.textContent = event.error;
@@ -67,7 +89,7 @@ export default class MollieComponent extends React.Component {
       }
     });
 
-    this.verificationCode.addEventListener("change", (event) => {
+    this.verificationCode.current.addEventListener("change", (event) => {
       if (this.verificationCodeErrorRef.current) {
         if (event.error && event.touched) {
           this.verificationCodeErrorRef.current.textContent = event.error;
@@ -98,7 +120,7 @@ export default class MollieComponent extends React.Component {
     // Reset possible form error
     if (this.formErrorRef.current) this.formErrorRef.current.textContent = "";
     // Get a payment token
-    const { token, error } = await this.mollie.createToken();
+    const { token, error } = await this.mollie.current.createToken();
 
     if (error) {
       this.enableForm();
@@ -106,11 +128,14 @@ export default class MollieComponent extends React.Component {
       return;
     }
 
+    //Show that token exists
+    console.log(token);
+
     // Add token to the form
-    const tokenInput = document.createElement("input");
+    //const tokenInput = document.createElement("input");
 
     // Re-submit form to the server
-    this.form.current.submit();
+    //this.form.current.submit();
   }
 
   render() {
@@ -122,7 +147,7 @@ export default class MollieComponent extends React.Component {
               <label className="label" htmlFor="card-holder">
                 Card holder
               </label>
-              <div id="card-holder" tabIndex={0}></div>
+              <div id="card-holder" tabIndex={0} ref={this.cardHolderDivRef}></div>
               <div
                 id="card-holder-error"
                 ref={this.cardHolderErrorRef}
@@ -135,7 +160,7 @@ export default class MollieComponent extends React.Component {
               <label className="label" htmlFor="card-number">
                 Card number
               </label>
-              <div id="card-number" tabIndex={1}></div>
+              <div id="card-number" tabIndex={1} ref={this.cardNumberDivRef}></div>
               <div
                 id="card-number-error"
                 ref={this.cardNumberErrorRef}
@@ -148,7 +173,7 @@ export default class MollieComponent extends React.Component {
               <label className="label" htmlFor="expiry-date">
                 Expiry date
               </label>
-              <div id="expiry-date" tabIndex={2}></div>
+              <div id="expiry-date" tabIndex={2} ref={this.expiryDateDivRef}></div>
               <div
                 id="expiry-date-error"
                 ref={this.expiryDateErrorRef}
@@ -161,7 +186,7 @@ export default class MollieComponent extends React.Component {
               <label className="label" htmlFor="verification-code">
                 Verification code
               </label>
-              <div id="verification-code" tabIndex={3}></div>
+              <div id="verification-code" tabIndex={3} ref={this.verificationCodeDivRef}></div>
               <div
                 id="verification-code-error"
                 ref={this.verificationCodeErrorRef}
